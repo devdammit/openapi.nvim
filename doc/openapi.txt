@@ -1,0 +1,123 @@
+*openapi.txt*                  Navigate OpenAPI / Swagger specs inside Neovim
+
+==============================================================================
+CONTENTS                                                      *openapi-contents*
+
+  1. Introduction ......................... |openapi-introduction|
+  2. Requirements ......................... |openapi-requirements|
+  3. Setup ................................ |openapi-setup|
+  4. Configuration ........................ |openapi-configuration|
+  5. Commands ............................. |openapi-commands|
+  6. Mappings ............................. |openapi-mappings|
+  7. Highlights ........................... |openapi-highlights|
+  8. Detection ............................ |openapi-detection|
+  9. Limitations .......................... |openapi-limitations|
+
+==============================================================================
+1. INTRODUCTION                                           *openapi-introduction*
+
+openapi.nvim lets you navigate OpenAPI / Swagger YAML specifications directly
+inside Neovim. It lists operations, fuzzy-finds schemas and components, and
+jumps between `$ref` declarations and references — no Swagger UI required.
+
+Parsing is done with treesitter; pickers use snacks.nvim.
+
+==============================================================================
+2. REQUIREMENTS                                           *openapi-requirements*
+
+- Neovim 0.10+
+- The `yaml` treesitter parser (`:TSInstall yaml`)
+- snacks.nvim for the picker UI (falls back to |vim.ui.select()| if absent)
+
+==============================================================================
+3. SETUP                                                         *openapi-setup*
+
+With lazy.nvim: >lua
+    {
+      "devdammit/openapi.nvim",
+      ft = "yaml",
+      dependencies = { "nvim-treesitter/nvim-treesitter" },
+      opts = {},
+    }
+<
+Or call setup directly: >lua
+    require("openapi").setup({})
+<
+==============================================================================
+4. CONFIGURATION                                         *openapi-configuration*
+
+Defaults: >lua
+    require("openapi").setup({
+      keys = {
+        declaration = "gd",          -- go to declaration on $ref
+        references  = "gr",          -- find $ref usages
+        operations  = "<leader>oo",  -- operations picker
+        components  = "<leader>os",  -- components picker
+      },
+      components = "all",            -- component kinds to index
+      detect_lines = 50,             -- leading lines scanned for openapi:/swagger:
+    })
+<
+Set any key to `false` to disable that mapping.
+
+==============================================================================
+5. COMMANDS                                                   *openapi-commands*
+
+These are created buffer-locally in detected OpenAPI buffers.
+
+                                                          *:OpenapiOperations*
+:OpenapiOperations      Open the operations picker.
+
+                                                          *:OpenapiComponents*
+:OpenapiComponents [kind]
+                        Open the components picker. With an optional {kind}
+                        argument (e.g. `schemas`) the list is filtered.
+
+                                                            *:OpenapiSchemas*
+:OpenapiSchemas         Components picker filtered to `schemas`.
+
+                                                         *:OpenapiReferences*
+:OpenapiReferences      Find references to the target under the cursor.
+
+==============================================================================
+6. MAPPINGS                                                   *openapi-mappings*
+
+In detected OpenAPI buffers (defaults):
+
+  gd          Go to the declaration referenced by the `$ref` under the cursor.
+              Falls back to |vim.lsp.buf.definition()| when not on a `$ref`.
+  gr          Find all `$ref` usages of the definition / ref under the cursor.
+              Falls back to |vim.lsp.buf.references()| otherwise.
+  <leader>oo  Open the operations picker.
+  <leader>os  Open the components picker.
+
+==============================================================================
+7. HIGHLIGHTS                                               *openapi-highlights*
+
+                                                      *hl-OpenapiRefUnderCursor*
+OpenapiRefUnderCursor   Applied to the `$ref` value under the cursor
+                        (underline + bold + accent). Defined with
+                        `default = true`, so it can be overridden: >lua
+    vim.api.nvim_set_hl(0, "OpenapiRefUnderCursor", {
+      underline = true,
+      fg = "#7aa2f7",
+    })
+<
+==============================================================================
+8. DETECTION                                                 *openapi-detection*
+
+A buffer is treated as an OpenAPI spec when its filetype is `yaml` and one of
+its first `detect_lines` lines contains a top-level `openapi:` or `swagger:`
+key. Regular YAML files are left untouched.
+
+==============================================================================
+9. LIMITATIONS                                             *openapi-limitations*
+
+- YAML only; JSON specs are not parsed.
+- Single-file `$ref` only. Internal refs (`#/components/...`) are fully
+  supported. External / multi-file refs are detected but cross-file
+  navigation is not implemented yet.
+- Parsing tolerates partially-invalid YAML; whatever treesitter recovers is
+  indexed.
+
+vim:tw=78:ts=8:noet:ft=help:norl:

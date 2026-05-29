@@ -1,0 +1,11 @@
+# Lua
+*.luac
+
+# Generated vim helptags
+/doc/tags
+
+# lua-language-server local config
+.luarc.json
+
+# OS
+.DS_Store

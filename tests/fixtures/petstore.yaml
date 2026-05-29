@@ -1,0 +1,44 @@
+openapi: 3.0.3
+info:
+  title: Petstore
+paths:
+  /users/{id}:
+    get:
+      operationId: getUser
+      summary: Get a user by ID
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      operationId: deleteUser
+      summary: Delete a user
+      responses:
+        '204':
+          description: gone
+  /pets:
+    post:
+      operationId: createPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        pet:
+          $ref: '#/components/schemas/Pet'
+    Pet:
+      type: object
+  parameters:
+    IdParam:
+      name: id
+      in: path
+  responses:
+    NotFound:
+      description: not found
