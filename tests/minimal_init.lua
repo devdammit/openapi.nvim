@@ -36,3 +36,10 @@ vim.opt.runtimepath:prepend(root())
 if pcall(require, "nvim-treesitter.configs") then
   pcall(vim.cmd, "TSInstallSync! yaml")
 end
+
+-- Fail loudly if the yaml parser still isn't available, so CI surfaces the
+-- real cause instead of the smoke test silently doing nothing.
+if not pcall(vim.treesitter.language.add, "yaml") then
+  io.stderr:write("FATAL: yaml treesitter parser is not available\n")
+  vim.cmd("cquit 1")
+end

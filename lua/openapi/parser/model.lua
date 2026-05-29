@@ -56,7 +56,7 @@ local function parse_paths(paths_node, bufnr, ops)
   if not paths_node then
     return
   end
-  for path_key, path_val, path_text in ts.iter_pairs(paths_node, bufnr) do
+  for _, path_val, path_text in ts.iter_pairs(paths_node, bufnr) do
     if path_text and path_text:sub(1, 1) == "/" then
       for m_key, _, m_text in ts.iter_pairs(path_val, bufnr) do
         if m_text and HTTP_METHODS[m_text:lower()] then
@@ -85,9 +85,9 @@ local function parse_components(components_node, bufnr, comps, targets)
   if not components_node then
     return
   end
-  for _kind_key, kind_val, kind_text in ts.iter_pairs(components_node, bufnr) do
+  for _, kind_val, kind_text in ts.iter_pairs(components_node, bufnr) do
     if kind_text then
-      for name_key, _name_val, name_text in ts.iter_pairs(kind_val, bufnr) do
+      for name_key, _, name_text in ts.iter_pairs(kind_val, bufnr) do
         if name_text then
           local pointer = "/components/" .. kind_text .. "/" .. name_text
           local pos = mkpos(name_key)

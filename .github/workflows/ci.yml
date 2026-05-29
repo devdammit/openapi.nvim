@@ -22,12 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: leafo/gh-actions-lua@v10
-        with:
-          luaVersion: "luajit-2.1.0-beta3"
-      - uses: leafo/gh-actions-luarocks@v4
-      - name: Install luacheck
-        run: luarocks install luacheck
+      - name: Install Lua and luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.4 luarocks
+          sudo luarocks install luacheck
       - name: Run luacheck
         run: luacheck lua/ plugin/
 
@@ -45,11 +44,10 @@ jobs:
         with:
           neovim: true
           version: ${{ matrix.neovim }}
-      - name: Cache test deps
-        uses: actions/cache@v4
-        with:
-          path: .test-deps
-          key: test-deps-${{ matrix.neovim }}-${{ hashFiles('tests/minimal_init.lua') }}
+      - name: Install C compiler (for treesitter parsers)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
       - name: Run headless smoke test
         env:
           OPENAPI_TEST_DEPS: ${{ github.workspace }}/.test-deps
